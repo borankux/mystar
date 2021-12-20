@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/google/go-github/github"
+	"github.com/spf13/viper"
 	"golang.org/x/oauth2"
 )
 
@@ -30,10 +31,24 @@ func main() {
 }
 
 func getClient(ctx context.Context) *github.Client{
-	token := ""
+	token := getConfig().GetString("key")
 	ts := oauth2.StaticTokenSource(&oauth2.Token{
 		AccessToken:  token,
 	})
+
 	tc := oauth2.NewClient(ctx, ts)
 	return github.NewClient(tc)
+}
+
+func getConfig() *viper.Viper{
+	v := viper.GetViper()
+	v.AddConfigPath("./")
+	v.SetConfigName("credentials")
+	v.SetConfigType("yml")
+	err := v.ReadInConfig()
+
+	if err != nil {
+		panic(v)
+	}
+	return v
 }
